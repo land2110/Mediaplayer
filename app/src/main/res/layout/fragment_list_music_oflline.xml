@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:id="@+id/bootom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:background="#7E57C2"
+            android:minHeight="112dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_centerHorizontal="true"
+                android:id="@+id/tv_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginLeft="16dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="16dp"
+                android:text="Xa em"
+                android:textColor="@color/white" />
+
+            <RelativeLayout
+                android:id="@+id/rl_run"
+                android:layout_below="@+id/tv_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/tv_current_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="16dp"
+                    android:text="00:00"
+                    android:textColor="#FFEB3B"
+                    android:textSize="12sp" />
+
+                <TextView
+                    android:id="@+id/tv_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="16dp"
+                    android:text="00:00"
+                    android:textColor="#FFEB3B"
+                    android:textSize="12sp" />
+
+                <androidx.appcompat.widget.AppCompatSeekBar
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginRight="8dp"
+                    android:id="@+id/seek_bar_music"
+                    android:layout_toLeftOf="@id/tv_duration"
+                    android:layout_toRightOf="@id/tv_current_duration" />
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_centerHorizontal="true"
+                android:layout_below="@+id/rl_run"
+                android:id="@+id/rl_play"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_previous"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?selectableItemBackground"
+                    android:src="@drawable/baseline_skip_previous_white_48dp" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_play"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?selectableItemBackground"
+                    android:src="@drawable/baseline_pause_white_48dp" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_next"
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="?selectableItemBackground"
+                    android:src="@drawable/baseline_skip_next_white_48dp" />
+            </LinearLayout>
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:layout_width="14dp"
+                android:src="@drawable/baseline_stop_white_48dp"
+                android:layout_below="@+id/rl_play"
+                android:layout_marginTop="-16dp"
+                android:layout_marginLeft="16dp"
+                android:layout_toRightOf="@+id/rl_play"
+                android:layout_marginBottom="8dp"
+                android:layout_height="14dp"/>
+        </RelativeLayout>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rc_music"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/bootom"
+            android:layout_below="@+id/actionbar"
+            android:layout_marginTop="16dp"
+            android:layout_marginBottom="-16dp" />
+    </RelativeLayout>
+</layout>

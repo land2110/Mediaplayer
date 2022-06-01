@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/drawer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fitsSystemWindows="true">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:id="@+id/actionbar"
+                android:layout_width="match_parent"
+                android:layout_height="?actionBarSize"
+                android:background="@color/purple_500">
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_menu"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:padding="14dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/baseline_segment_white_48dp" />
+
+                <TextView
+                    android:id="@+id/tv_menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_gravity="center_vertical"
+                    android:layout_toRightOf="@+id/btn_menu"
+                    android:text="Music oflline"
+                    android:textColor="@color/white"
+                    android:textSize="18sp" />
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/btn_search"
+                    android:layout_width="48dp"
+                    android:layout_height="56dp"
+                    android:layout_alignParentRight="true"
+                    android:background="?selectableItemBackgroundBorderless"
+                    android:padding="15dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/baseline_search_black_48dp"
+                    android:tint="@color/white" />
+
+                <androidx.appcompat.widget.AppCompatEditText
+                    android:id="@+id/edt_search"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="16dp"
+                    android:layout_toLeftOf="@+id/btn_search"
+                    android:layout_toRightOf="@+id/tv_menu"
+                    android:background="@drawable/bg_edt"
+                    android:hint="Song name"
+                    android:paddingLeft="8dp"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:singleLine="true" />
+            </RelativeLayout>
+
+            <FrameLayout
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+        </LinearLayout>
+
+        <com.google.android.material.navigation.NavigationView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="left"
+            android:fitsSystemWindows="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="192dp"
+                    android:background="?colorPrimary">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/iv_avatar"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="82dp"
+                        android:src="@drawable/ao_dai" />
+
+                    <TextView
+                        android:id="@+id/tv_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/iv_avatar"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="4dp"
+                        android:text="nguyen dinh duc"
+                        android:textColor="@color/white" />
+
+                    <TextView
+                        android:id="@+id/tv_email"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/tv_name"
+                        android:layout_marginLeft="16dp"
+                        android:layout_marginTop="2dp"
+                        android:text="ducnd@gmail.com"
+                        android:textColor="@color/white" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/tv_music_offline"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?actionBarItemBackground"
+                    android:drawableLeft="@drawable/baseline_library_music_purple_400_18dp"
+                    android:drawablePadding="8dp"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:text="Music Offline"
+                    android:textColor="?colorPrimary" />
+
+                <TextView
+                    android:id="@+id/tv_music_online"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?actionBarItemBackground"
+                    android:drawableLeft="@drawable/baseline_library_music_purple_400_18dp"
+                    android:drawablePadding="8dp"
+                    android:drawableTint="@color/gray_500"
+                    android:paddingLeft="16dp"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:text="Music Online" />
+            </LinearLayout>
+        </com.google.android.material.navigation.NavigationView>
+
+    </androidx.drawerlayout.widget.DrawerLayout>
+</layout>
