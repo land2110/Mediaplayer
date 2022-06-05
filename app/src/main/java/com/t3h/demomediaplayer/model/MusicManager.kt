@@ -6,11 +6,11 @@ import android.util.Log
 class MusicManager : MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpdateListener,
     MediaPlayer.OnCompletionListener {
 
-    companion object{
+    companion object {
         //static
-        private var instance: MusicManager?=null
-        fun getInstance(): MusicManager{
-            if (instance == null){
+        private var instance: MusicManager? = null
+        fun getInstance(): MusicManager {
+            if (instance == null) {
                 instance = MusicManager()
             }
             return instance!!
@@ -19,6 +19,7 @@ class MusicManager : MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpda
 
     private var mp: MediaPlayer? = null
     private var isPrepared = false
+
     private constructor()
 
 
@@ -30,12 +31,12 @@ class MusicManager : MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpda
         isPrepared = false
         mp?.setOnBufferingUpdateListener(this)
         mp?.setOnCompletionListener(this)
-        if ( url.contains("http")){
+        if (url.contains("http")) {
             mp?.prepareAsync()
-        }else {
+        } else {
             mp?.prepare()
             start()
-            isPrepared=true
+            isPrepared = true
         }
 
     }
@@ -52,23 +53,30 @@ class MusicManager : MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpda
         mp?.pause()
     }
 
+    fun isPlay(): Boolean {
+        if (mp != null) {
+            return false
+        }
+        return mp!!.isPlaying()
+    }
+
     fun release() {
         mp?.release()
         mp = null
     }
 
-    fun getCurrentPosition() : Int{
-        if (mp == null ){
+    fun getCurrentPosition(): Int {
+        if (mp == null) {
             return 0
         }
         return mp!!.currentPosition
     }
 
-    fun seek(position:Int){
+    fun seek(position: Int) {
         mp?.seekTo(position)
     }
 
-    fun isEmptyMp() :Boolean{
+    fun isEmptyMp(): Boolean {
         return mp == null
     }
 
@@ -77,17 +85,17 @@ class MusicManager : MediaPlayer.OnPreparedListener, MediaPlayer.OnBufferingUpda
         start()
     }
 
-    fun getDuration(): Long{
-        if (mp != null && isPrepared){
+    fun getDuration(): Long {
+        if (mp != null && isPrepared) {
             return mp!!.duration.toLong()
-        }else {
+        } else {
             return 0
         }
 
     }
 
     override fun onBufferingUpdate(mp: MediaPlayer, percent: Int) {
-        Log.d("MusicOnlineManager", "onBufferingUpdate: "+percent.toString())
+        Log.d("MusicOnlineManager", "onBufferingUpdate: " + percent.toString())
     }
 
     override fun onCompletion(mp: MediaPlayer) {

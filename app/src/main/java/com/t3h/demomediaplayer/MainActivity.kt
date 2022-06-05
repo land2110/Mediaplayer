@@ -1,5 +1,6 @@
 package com.t3h.demomediaplayer
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -19,13 +20,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
-        supportFragmentManager.beginTransaction()
-            .add(
-                R.id.content,
-                ListMusicOfflineFragment(),
-                ListMusicOfflineFragment::class.java.name
-            )
-            .commit()
 
         binding.btnMenu.setOnClickListener {
             binding.drawer.openDrawer(Gravity.LEFT)
@@ -34,6 +28,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
         binding.tvMusicOnline.setOnClickListener(this)
         binding.btnSearch.setOnClickListener(this)
         binding.edtSearch.addTextChangedListener(this)
+        supportFragmentManager.beginTransaction()
+            .add(
+                R.id.content,
+                ListMusicOfflineFragment(),
+                ListMusicOfflineFragment::class.java.name
+            )
+            .commit()
+
+
+
+        val action = intent.action
+        if ("FROM_SERVICE_ONLINE".equals(action)){
+           openFromNotificationServiceOnline()
+        }
     }
 
     override fun onBackPressed() {
@@ -67,17 +75,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
             }
             R.id.tv_music_online->{
                 binding.drawer.closeDrawer(Gravity.LEFT)
-                val fg = getCurrentFragment()
-                if (fg!= null && fg is MusicOnlineFragment ){
-                    return
-                }
-                supportFragmentManager.beginTransaction()
-                    .replace(
-                        R.id.content,
-                        MusicOnlineFragment(),
-                        MusicOnlineFragment::class.java.name
-                    )
-                    .commit()
+                openMusicOnline()
             }
             R.id.btn_search->{
                 val fg = getCurrentFragment()
@@ -93,6 +91,20 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
                 }
             }
         }
+    }
+
+    private fun openMusicOnline(){
+        val fg = getCurrentFragment()
+        if (fg!= null && fg is MusicOnlineFragment ){
+            return
+        }
+        supportFragmentManager.beginTransaction()
+            .replace(
+                R.id.content,
+                MusicOnlineFragment(),
+                MusicOnlineFragment::class.java.name
+            )
+            .commit()
     }
 
     override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -115,5 +127,17 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
                 )
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val action = intent.action
+        if ("FROM_SERVICE_ONLINE".equals(action)){
+            openFromNotificationServiceOnline()
+        }
+    }
+
+    private fun openFromNotificationServiceOnline(){
+        openMusicOnline()
     }
 }
