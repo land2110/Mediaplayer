@@ -9,6 +9,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import com.t3h.demomediaplayer.database.AppDatabase
 import com.t3h.demomediaplayer.databinding.ActivityMainBinding
 import com.t3h.demomediaplayer.fragment.ListMusicOfflineFragment
 import com.t3h.demomediaplayer.fragment.MusicOnlineFragment
@@ -85,7 +86,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
                         fg.getDataSyn()
                     }else {
                         fg.getDataSearch(
-                            "https://chiasenhac.vn/tim-kiem?q=${contentSearch.replace(" ","%20")}"
+                            "https://chiasenhac.vn/tim-kiem?q=${contentSearch.replace(" ","%20")}",
+                            contentSearch
                         )
                     }
                 }
@@ -123,7 +125,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
                 fg.getDataSyn()
             }else {
                 fg.getDataSearch(
-                    "https://chiasenhac.vn/tim-kiem?q=${contentSearch.replace(" ","%20")}"
+                    "https://chiasenhac.vn/tim-kiem?q=${contentSearch.replace(" ","%20")}",
+                    contentSearch
                 )
             }
         }

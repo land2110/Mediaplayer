@@ -96,8 +96,8 @@ class MusicOnlineFragment : Fragment(), SongOnlineAdapter.ISongOnline,
         service?.getDataSyn()
     }
 
-    fun getDataSearch(url: String) {
-        service?.getDataSearch(url)
+    fun getDataSearch(url: String, keySearch: String) {
+        service?.getDataSearch(url, keySearch)
     }
 
     override fun onRefresh() {

@@ -1,12 +1,16 @@
 package com.t3h.demomediaplayer.service
 
 import android.annotation.SuppressLint
-import android.app.*
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
+import android.net.ConnectivityManager
 import android.os.Binder
 import android.os.Build
 import android.os.Environment
@@ -18,6 +22,7 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import com.t3h.demomediaplayer.MainActivity
 import com.t3h.demomediaplayer.R
+import com.t3h.demomediaplayer.database.AppDatabase
 import com.t3h.demomediaplayer.model.MusicManager
 import com.t3h.demomediaplayer.model.MusicOnline
 import io.reactivex.Observable
@@ -27,7 +32,6 @@ import io.reactivex.schedulers.Schedulers
 import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
-import java.lang.Exception
 import java.net.URL
 
 
@@ -38,6 +42,7 @@ class MediaPlayerMusicOnlineService : Service() {
 
     var url = "https://chiasenhac.vn/mp3/vietnam.html?tab=bai-hat-moi"
     var urlSearch = ""
+    var keySearch = ""
     private var dis: Disposable? = null
     private var currentPosition = -1
 
@@ -55,32 +60,32 @@ class MediaPlayerMusicOnlineService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val action = intent?.action
-        if ( action != null){
+        if (action != null) {
             makeAction(action)
         }
         return START_NOT_STICKY
     }
 
-    private fun makeAction(action:String){
-        when(action){
-            "PREVIOUS"->{
-                currentPosition-=1
-                if ( currentPosition <0){
+    private fun makeAction(action: String) {
+        when (action) {
+            "PREVIOUS" -> {
+                currentPosition -= 1
+                if (currentPosition < 0) {
                     currentPosition = 0
                 }
                 parseToGetMusic(currentPosition)
             }
-            "PAUSE"->{
-                if (mp.isPlay()){
+            "PAUSE" -> {
+                if (mp.isPlay()) {
                     mp.pause()
-                }else {
+                } else {
                     mp.start()
                 }
 
             }
-            "NEXT"->{
-                currentPosition+=1
-                if ( currentPosition >= getSongDatas().size){
+            "NEXT" -> {
+                currentPosition += 1
+                if (currentPosition >= getSongDatas().size) {
                     currentPosition = 0
                 }
                 parseToGetMusic(currentPosition)
@@ -93,13 +98,21 @@ class MediaPlayerMusicOnlineService : Service() {
 
     fun getDataSyn() {
         this.urlSearch = ""
+        this.keySearch = ""
         //huy RX
         dis?.dispose()
         dis = Observable.create<MutableList<MusicOnline>> {
             //tren thead khac
             val songs = mutableListOf<MusicOnline>()
-            for (i in (1..27)) {
-                songs.addAll(getDataAsyn("${url}&page=${i}"))
+            if (isNetworkConnected()){
+                for (i in (1..27)) {
+                    songs.addAll(getDataAsyn("${url}&page=${i}", ""))
+                }
+                updateDatabase(songs, keySearch)
+            }else {
+                songs.addAll(
+                    AppDatabase.getInstance(this).musicOnlineDao().getAllMusicByKeySearch(keySearch)
+                )
             }
             it.onNext(songs)
             it.onComplete()
@@ -119,11 +132,11 @@ class MediaPlayerMusicOnlineService : Service() {
         if ("".equals(urlSearch)) {
             getDataSyn()
         } else {
-            getDataSearch(urlSearch)
+            getDataSearch(urlSearch, keySearch)
         }
     }
 
-    private fun getDataAsyn(url: String): MutableList<MusicOnline> {
+    private fun getDataAsyn(url: String, keySearch: String): MutableList<MusicOnline> {
         val songs = mutableListOf<MusicOnline>()
 //        Jsoup: phan tich web html
         try {
@@ -136,7 +149,9 @@ class MediaPlayerMusicOnlineService : Service() {
                     val htmlLink = "https://chiasenhac.vn" + col.select("a").attr("href")
                     val name = col.select("a").attr("title")
                     val singer = col.select("a").get(2).text()
-                    songs.add(MusicOnline(htmlLink, name, singer, htmlLink, imageLink))
+                    val music = MusicOnline(htmlLink, keySearch, name, singer, htmlLink, imageLink)
+
+                    songs.add(music)
                     Log.d(
                         "MusicOnlineActivity", "name: " + name +
                                 "\nlink: " + htmlLink +
@@ -155,16 +170,33 @@ class MediaPlayerMusicOnlineService : Service() {
         return songs
     }
 
-    fun getDataSearch(url: String) {
+    private fun updateDatabase(songs: MutableList<MusicOnline>, url: String){
+        AppDatabase.getInstance(this).musicOnlineDao().delete(url)
+        AppDatabase.getInstance(this).musicOnlineDao().insertchAll(songs)
+    }
+
+    fun getDataSearch(url: String, keySearch: String) {
 //        binding.refresh.isRefreshing = true
         this.urlSearch = url
+        this.keySearch = keySearch
         dis?.dispose()
         dis = Observable.create<MutableList<MusicOnline>> {
             //tren thead khac
             val songs = mutableListOf<MusicOnline>()
-            for (i in (1..3)) {
+            if (isNetworkConnected()){
+                for (i in (1..3)) {
+                    songs.addAll(
+                        getDataSearchAsyn("${url}&page_music==${i}", keySearch)
+                    )
+                }
+                //update vao trong database
+//            1. delete với keySearch:
+//            2. insert vào trong database
+                updateDatabase(songs, keySearch)
+            }else {
                 songs.addAll(
-                    getDataSearchAsyn("${url}&page_music==${i}")
+                    AppDatabase.getInstance(this).musicOnlineDao()
+                        .getAllMusicByKeySearch(keySearch)
                 )
             }
             it.onNext(songs)
@@ -181,7 +213,7 @@ class MediaPlayerMusicOnlineService : Service() {
             )
     }
 
-    private fun getDataSearchAsyn(url: String): MutableList<MusicOnline> {
+    private fun getDataSearchAsyn(url: String, keySearch: String): MutableList<MusicOnline> {
         val songs = mutableListOf<MusicOnline>()
         try {
             val doc = Jsoup.connect(url).get()
@@ -195,7 +227,8 @@ class MediaPlayerMusicOnlineService : Service() {
                     if ("".equals(author)) {
                         continue
                     }
-                    songs.add(MusicOnline(htmlLink, name, author, htmlLink, imageLink))
+                    val music = MusicOnline(htmlLink, keySearch, name, author, htmlLink, imageLink)
+                    songs.add(music)
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
@@ -358,16 +391,20 @@ class MediaPlayerMusicOnlineService : Service() {
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.drawable.media))
             .setSmallIcon(R.drawable.baseline_library_music_purple_500_24dp)
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                //set sự kiện, khi click vào notification(Mở MainActivity)
-                //khi click vào Notification thì:
-                    //1: onCreate nếu activity đó chết
-                    //2: onNewIntent nếu activity đó đang sống.
+            //set sự kiện, khi click vào notification(Mở MainActivity)
+            //khi click vào Notification thì:
+            //1: onCreate nếu activity đó chết
+            //2: onNewIntent nếu activity đó đang sống.
             .setContentIntent(pendingIntentContent)
-                //action
-            .addAction(R.drawable.baseline_skip_previous_white_48dp, "previous", pendingIntentPrevious) // #0
+            //action
+            .addAction(
+                R.drawable.baseline_skip_previous_white_48dp,
+                "previous",
+                pendingIntentPrevious
+            ) // #0
             .addAction(R.drawable.baseline_play_arrow_white_48dp, "pause", pendingIntentPause) // #0
             .addAction(R.drawable.baseline_skip_next_white_48dp, "next", pendingIntentNext) // #0
-                //set style: Media
+            //set style: Media
             .setStyle(style)
             .build()
 
@@ -376,6 +413,11 @@ class MediaPlayerMusicOnlineService : Service() {
 
         startForeground(2, noti)
 
+    }
+
+    private fun isNetworkConnected(): Boolean {
+        val cm = getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        return cm.activeNetworkInfo != null && cm.activeNetworkInfo!!.isConnected
     }
 
 }
