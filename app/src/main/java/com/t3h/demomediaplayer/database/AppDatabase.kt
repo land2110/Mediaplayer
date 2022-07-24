@@ -18,10 +18,10 @@ abstract class AppDatabase : RoomDatabase() {
                 .build()
 
         private var INSTANCE: AppDatabase? = null
-        fun getInstance(context: Context): AppDatabase {
-            if (INSTANCE == null) {
-                INSTANCE = buildDatabase(context)
-            }
+        fun inits(context: Context){
+            INSTANCE = buildDatabase(context)
+        }
+        fun getInstance(): AppDatabase {
             return INSTANCE!!
         }
     }

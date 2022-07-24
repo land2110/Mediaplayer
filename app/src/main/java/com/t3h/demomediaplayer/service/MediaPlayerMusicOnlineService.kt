@@ -11,10 +11,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.media.MediaPlayer
 import android.net.ConnectivityManager
-import android.os.Binder
-import android.os.Build
-import android.os.Environment
-import android.os.IBinder
+import android.os.*
 import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
@@ -22,7 +19,9 @@ import androidx.core.app.NotificationCompat
 import androidx.lifecycle.MutableLiveData
 import com.t3h.demomediaplayer.MainActivity
 import com.t3h.demomediaplayer.R
+import com.t3h.demomediaplayer.common.App
 import com.t3h.demomediaplayer.database.AppDatabase
+import com.t3h.demomediaplayer.database.MusicOnlineDao
 import com.t3h.demomediaplayer.model.MusicManager
 import com.t3h.demomediaplayer.model.MusicOnline
 import io.reactivex.Observable
@@ -33,6 +32,7 @@ import org.jsoup.Jsoup
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URL
+import javax.inject.Inject
 
 
 class MediaPlayerMusicOnlineService : Service() {
@@ -45,12 +45,18 @@ class MediaPlayerMusicOnlineService : Service() {
     var keySearch = ""
     private var dis: Disposable? = null
     private var currentPosition = -1
+    private var currentPage = 1
 
     private val songDatas = mutableListOf<MusicOnline>()
+
+    @Inject
+    lateinit var model: DatabaseModel
 
 
     override fun onCreate() {
         super.onCreate()
+        //bat buoc
+        (applicationContext as App).appComponent().inject(this)
         createNotificationChannel()
     }
 
@@ -96,22 +102,30 @@ class MediaPlayerMusicOnlineService : Service() {
     class MyBinder(val service: MediaPlayerMusicOnlineService) : Binder()
 
 
-    fun getDataSyn() {
+    fun getDataSyn(isRefresh: Boolean = true) {
         this.urlSearch = ""
         this.keySearch = ""
+        if (isRefresh){
+            currentPage=1
+        }
         //huy RX
         dis?.dispose()
         dis = Observable.create<MutableList<MusicOnline>> {
             //tren thead khac
             val songs = mutableListOf<MusicOnline>()
-            if (isNetworkConnected()){
-                for (i in (1..27)) {
-                    songs.addAll(getDataAsyn("${url}&page=${i}", ""))
+            if (isNetworkConnected()) {
+                if (isRefresh) {
+                    currentPage = 1
+                    songs.addAll(getDataAsyn("${url}&page=${currentPage}", ""))
+                } else {
+                    currentPage+=1
+                    songs.addAll(getDataAsyn("${url}&page=${currentPage}", ""))
                 }
+
                 updateDatabase(songs, keySearch)
-            }else {
+            } else {
                 songs.addAll(
-                    AppDatabase.getInstance(this).musicOnlineDao().getAllMusicByKeySearch(keySearch)
+                    AppDatabase.getInstance().musicOnlineDao().getAllMusicByKeySearch(keySearch)
                 )
             }
             it.onNext(songs)
@@ -121,9 +135,14 @@ class MediaPlayerMusicOnlineService : Service() {
             .subscribe(
                 {
                     //mainthread
-                    songDatas.clear()
-                    songDatas.addAll(it)
-                    viewModelItemSongs.value = it
+                    Handler().postDelayed({
+                        if (isRefresh){
+                            songDatas.clear()
+                        }
+                        songDatas.addAll(it)
+                        viewModelItemSongs.value = it
+                    }, 2000)
+
                 }
             )
     }
@@ -170,9 +189,9 @@ class MediaPlayerMusicOnlineService : Service() {
         return songs
     }
 
-    private fun updateDatabase(songs: MutableList<MusicOnline>, url: String){
-        AppDatabase.getInstance(this).musicOnlineDao().delete(url)
-        AppDatabase.getInstance(this).musicOnlineDao().insertchAll(songs)
+    private fun updateDatabase(songs: MutableList<MusicOnline>, url: String) {
+        model.musicOnlineDao.delete(url)
+        model.musicOnlineDao.insertchAll(songs)
     }
 
     fun getDataSearch(url: String, keySearch: String) {
@@ -183,7 +202,7 @@ class MediaPlayerMusicOnlineService : Service() {
         dis = Observable.create<MutableList<MusicOnline>> {
             //tren thead khac
             val songs = mutableListOf<MusicOnline>()
-            if (isNetworkConnected()){
+            if (isNetworkConnected()) {
                 for (i in (1..3)) {
                     songs.addAll(
                         getDataSearchAsyn("${url}&page_music==${i}", keySearch)
@@ -193,9 +212,9 @@ class MediaPlayerMusicOnlineService : Service() {
 //            1. delete với keySearch:
 //            2. insert vào trong database
                 updateDatabase(songs, keySearch)
-            }else {
+            } else {
                 songs.addAll(
-                    AppDatabase.getInstance(this).musicOnlineDao()
+                    AppDatabase.getInstance().musicOnlineDao()
                         .getAllMusicByKeySearch(keySearch)
                 )
             }

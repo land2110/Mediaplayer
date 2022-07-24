@@ -28,7 +28,24 @@ class MusicOnlineFragment : Fragment(), SongOnlineAdapter.ISongOnline,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentMusicOnlineBinding.inflate(inflater, container, false)
-        binding.rcSong.layoutManager = GridLayoutManager(context, 3)
+        val gri = GridLayoutManager(context, 3)
+
+        gri.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+            override fun getSpanSize(position: Int): Int {
+                if (position == getCount() - 1) {
+                    return 3
+                } else {
+                    if (position % 7 == 0) {
+                        return 3
+                    } else {
+                        return 1
+                    }
+                    return 1
+                }
+            }
+        }
+
+        binding.rcSong.layoutManager = gri
         binding.rcSong.adapter = SongOnlineAdapter(this)
         binding.refresh.setOnRefreshListener(this)
         startServiceUnBound()
@@ -50,7 +67,7 @@ class MusicOnlineFragment : Fragment(), SongOnlineAdapter.ISongOnline,
                 if (service?.getSongDatas()?.size == 0) {
                     binding.refresh.isRefreshing = true
                     service?.getDataSyn()
-                }else {
+                } else {
                     binding.rcSong.adapter?.notifyDataSetChanged()
                 }
 
@@ -68,8 +85,14 @@ class MusicOnlineFragment : Fragment(), SongOnlineAdapter.ISongOnline,
     private fun register() {
         service?.viewModelItemSongs?.observe(viewLifecycleOwner, {
             binding.rcSong.adapter?.notifyDataSetChanged()
+            (binding.rcSong.adapter as SongOnlineAdapter).isLoading = false
             binding.refresh.isRefreshing = false
         })
+    }
+
+    override fun continueLoad() {
+        binding.refresh.isRefreshing = true
+        service?.getDataSyn(false)
     }
 
     override fun onDestroyView() {
@@ -81,7 +104,7 @@ class MusicOnlineFragment : Fragment(), SongOnlineAdapter.ISongOnline,
         if (service == null) {
             return 0
         }
-        return service!!.getSongDatas().size
+        return service!!.getSongDatas().size + 1
     }
 
     override fun getData(position: Int): MusicOnline {

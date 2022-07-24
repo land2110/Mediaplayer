@@ -101,4 +101,7 @@ dependencies {
     kapt "android.arch.persistence.room:compiler:1.1.1"
 
     kapt "androidx.room:room-compiler:2.5.0-alpha02"
+
+    implementation 'com.google.dagger:dagger:2.+'
+    kapt 'com.google.dagger:dagger-compiler:2.+'
 }

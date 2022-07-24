@@ -9,16 +9,22 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import com.t3h.demomediaplayer.common.App
 import com.t3h.demomediaplayer.database.AppDatabase
+import com.t3h.demomediaplayer.database.MusicOnlineDao
 import com.t3h.demomediaplayer.databinding.ActivityMainBinding
 import com.t3h.demomediaplayer.fragment.ListMusicOfflineFragment
 import com.t3h.demomediaplayer.fragment.MusicOnlineFragment
+import javax.inject.Inject
 
 class MainActivity : AppCompatActivity(), View.OnClickListener, TextWatcher {
     private lateinit var binding:ActivityMainBinding
 
+    @Inject
+    lateinit var musicOnlineDao: MusicOnlineDao
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        (applicationContext as App).appComponent().inject(this)
         binding = DataBindingUtil.setContentView(this,R.layout.activity_main)
 
 

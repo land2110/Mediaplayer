@@ -1,4 +1,4 @@
-package com.t3h.demomediaplayer
+package com.t3h.demomediaplayer.common
 
 import android.widget.ImageView
 import android.widget.TextView
@@ -7,6 +7,7 @@ import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import android.content.ContentUris
 import android.net.Uri
+import com.t3h.demomediaplayer.R
 
 
 object CommonApp {
